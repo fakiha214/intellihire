@@ -1,0 +1,17 @@
+{
+  "encoder_layers": 1,
+  "decoder_layers": 2,
+  "use_attention": true,
+  "batch_size": 32,
+  "learning_rate": 0.001,
+  "num_epochs": 1,
+  "max_length": 50,
+  "gradient_clip": 1.0,
+  "weight_decay": 1e-05,
+  "print_freq": 50,
+  "eval_freq": 200,
+  "embedding_dim": 128,
+  "hidden_size": 128,
+  "dropout": 0.1,
+  "save_dir": "experiments/exp2_hidden_128_dropout_0.1"
+}

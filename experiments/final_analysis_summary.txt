@@ -1,0 +1,12 @@
+EXPERIMENT ANALYSIS SUMMARY
+Generated: 2025-09-14 14:35:03.206245
+
+Best Model: exp3_lr_1e-3_batch_16
+Validation Loss: 4.8980
+Perplexity: 134.02
+Configuration:
+  - Embedding: 256
+  - Hidden: 256
+  - Dropout: 0.1
+  - LR: 0.001
+  - Batch: 16

@@ -1,0 +1,27 @@
+{
+  "experiment_name": "exp2_hidden_256_dropout_0.3",
+  "config": {
+    "encoder_layers": 1,
+    "decoder_layers": 2,
+    "use_attention": true,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "num_epochs": 1,
+    "max_length": 50,
+    "gradient_clip": 1.0,
+    "weight_decay": 1e-05,
+    "print_freq": 50,
+    "eval_freq": 200,
+    "embedding_dim": 128,
+    "hidden_size": 256,
+    "dropout": 0.3,
+    "save_dir": "experiments/exp2_hidden_256_dropout_0.3"
+  },
+  "training_time_minutes": 32.118974955876666,
+  "model_parameters": 4634320,
+  "best_val_loss": 5.4220267613728845,
+  "best_val_bleu": 0.0,
+  "final_train_loss": 5.983591713079203,
+  "perplexity": 226.3373565673828,
+  "status": "completed"
+}

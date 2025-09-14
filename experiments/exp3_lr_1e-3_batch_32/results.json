@@ -1,0 +1,27 @@
+{
+  "experiment_name": "exp3_lr_1e-3_batch_32",
+  "config": {
+    "encoder_layers": 1,
+    "decoder_layers": 2,
+    "use_attention": true,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "num_epochs": 1,
+    "max_length": 50,
+    "gradient_clip": 1.0,
+    "weight_decay": 1e-05,
+    "print_freq": 50,
+    "eval_freq": 200,
+    "embedding_dim": 256,
+    "hidden_size": 256,
+    "dropout": 0.1,
+    "save_dir": "experiments/exp3_lr_1e-3_batch_32"
+  },
+  "training_time_minutes": 31.3935796101888,
+  "model_parameters": 5795536,
+  "best_val_loss": 5.105614696849476,
+  "best_val_bleu": 0.0,
+  "final_train_loss": 5.776558090488237,
+  "perplexity": 164.94541931152344,
+  "status": "completed"
+}
