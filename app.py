@@ -12,6 +12,7 @@ import os
 from collections import defaultdict, Counter
 import time
 from datetime import datetime
+import gdown
 
 # Page configuration
 st.set_page_config(
@@ -289,6 +290,36 @@ class Seq2SeqModel(nn.Module):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
 # ===================================================================
+# GOOGLE DRIVE MODEL DOWNLOAD
+# ===================================================================
+
+# Google Drive file IDs
+MODEL_FILES = {
+    'final_model.pth': '1s7ab6uIveARNI7D4YBUoF97suJFolu2o',
+    'urdu_tokenizer.pkl': '1bLEDbbFXcUW9Svf5MMPG8o8AT2DFpWy9',
+    'roman_tokenizer.pkl': '1JKakfYGFwCxK4TCw1uLiff13WouMBW0c'
+}
+
+def download_model_files():
+    """Download model files from Google Drive on first run"""
+    model_dir = "model_files"
+    os.makedirs(model_dir, exist_ok=True)
+
+    for filename, file_id in MODEL_FILES.items():
+        filepath = os.path.join(model_dir, filename)
+
+        if not os.path.exists(filepath):
+            st.info(f"📥 Downloading {filename}...")
+            try:
+                url = f"https://drive.google.com/uc?id={file_id}"
+                gdown.download(url, filepath, quiet=False)
+                st.success(f"✅ Downloaded {filename}")
+            except Exception as e:
+                st.error(f"❌ Failed to download {filename}: {str(e)}")
+                return False
+    return True
+
+# ===================================================================
 # TRANSLATION FUNCTIONS
 # ===================================================================
 
@@ -296,12 +327,16 @@ class Seq2SeqModel(nn.Module):
 def load_model_and_tokenizers():
     """Load the trained model and tokenizers"""
     try:
-        # Load tokenizers
+        # First download files from Google Drive if needed
+        if not download_model_files():
+            return None, None, None
+
+        # Load tokenizers from downloaded files
         urdu_tokenizer = BPETokenizer()
         roman_tokenizer = BPETokenizer()
 
-        urdu_tokenizer.load('colab_result_data/urdu_tokenizer.pkl')
-        roman_tokenizer.load('colab_result_data/roman_tokenizer.pkl')
+        urdu_tokenizer.load('model_files/urdu_tokenizer.pkl')
+        roman_tokenizer.load('model_files/roman_tokenizer.pkl')
 
         # Create model
         model = Seq2SeqModel(
@@ -317,9 +352,9 @@ def load_model_and_tokenizers():
             use_attention=True
         )
 
-        # Load trained weights
+        # Load trained weights from downloaded file
         device = torch.device('cpu')  # Streamlit Cloud uses CPU
-        model.load_state_dict(torch.load('colab_result_data/final_model.pth', map_location=device))
+        model.load_state_dict(torch.load('model_files/final_model.pth', map_location=device))
         model.eval()
 
         return model, urdu_tokenizer, roman_tokenizer
