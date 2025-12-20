@@ -538,3 +538,12 @@ const handleAsyncError = async (asyncFunction) => {
     throw new Error(`Operation failed: ${error.message}`);
   }
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};
