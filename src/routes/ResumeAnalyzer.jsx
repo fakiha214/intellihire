@@ -400,3 +400,12 @@ const authenticateUser = async (email, password) => {
     return null;
   }
 };
+
+// Feature: Job search and filtering
+const searchJobs = (jobs, filters) => {
+  return jobs.filter(job => {
+    return (!filters.title || job.title.includes(filters.title)) &&
+           (!filters.location || job.location === filters.location) &&
+           (!filters.salary || job.salary >= filters.salary);
+  });
+};
