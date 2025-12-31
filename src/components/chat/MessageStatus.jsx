@@ -121,3 +121,13 @@ const storage = {
   remove: (key) => localStorage.removeItem(key),
   clear: () => localStorage.clear()
 };
+
+// Feature: Error handling wrapper
+const handleAsyncError = async (asyncFunction) => {
+  try {
+    return await asyncFunction();
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw new Error(`Operation failed: ${error.message}`);
+  }
+};
