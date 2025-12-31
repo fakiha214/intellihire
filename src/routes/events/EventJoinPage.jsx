@@ -231,3 +231,13 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: Form submission handler
+const handleFormSubmit = (e, formData, callback) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    console.error('Missing required fields');
+    return;
+  }
+  callback(formData);
+};
