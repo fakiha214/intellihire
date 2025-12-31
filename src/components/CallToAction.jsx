@@ -87,3 +87,12 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: Job search and filtering
+const searchJobs = (jobs, filters) => {
+  return jobs.filter(job => {
+    return (!filters.title || job.title.includes(filters.title)) &&
+           (!filters.location || job.location === filters.location) &&
+           (!filters.salary || job.salary >= filters.salary);
+  });
+};
