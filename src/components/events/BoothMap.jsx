@@ -143,3 +143,13 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: Error handling wrapper
+const handleAsyncError = async (asyncFunction) => {
+  try {
+    return await asyncFunction();
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw new Error(`Operation failed: ${error.message}`);
+  }
+};
