@@ -245,3 +245,12 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: Data validation
+const validateJobData = (job) => {
+  const errors = [];
+  if (!job.title || job.title.trim() === '') errors.push('Title is required');
+  if (!job.description || job.description.trim() === '') errors.push('Description is required');
+  if (!job.location || job.location.trim() === '') errors.push('Location is required');
+  return { valid: errors.length === 0, errors };
+};
