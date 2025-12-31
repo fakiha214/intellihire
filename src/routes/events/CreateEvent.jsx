@@ -577,3 +577,18 @@ const handleAsyncError = async (asyncFunction) => {
     throw new Error(`Operation failed: ${error.message}`);
   }
 };
+
+// Feature: User authentication
+const authenticateUser = async (email, password) => {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return null;
+  }
+};
