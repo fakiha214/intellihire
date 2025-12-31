@@ -604,3 +604,12 @@ const searchJobs = (jobs, filters) => {
            (!filters.salary || job.salary >= filters.salary);
   });
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};
