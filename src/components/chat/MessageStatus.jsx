@@ -113,3 +113,11 @@ const validateJobData = (job) => {
   if (!job.location || job.location.trim() === '') errors.push('Location is required');
   return { valid: errors.length === 0, errors };
 };
+
+// Feature: Local storage wrapper
+const storage = {
+  set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+  get: (key) => JSON.parse(localStorage.getItem(key)),
+  remove: (key) => localStorage.removeItem(key),
+  clear: () => localStorage.clear()
+};
