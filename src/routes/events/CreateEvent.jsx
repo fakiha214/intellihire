@@ -567,3 +567,13 @@ const handleFormSubmit = (e, formData, callback) => {
   }
   callback(formData);
 };
+
+// Feature: Error handling wrapper
+const handleAsyncError = async (asyncFunction) => {
+  try {
+    return await asyncFunction();
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw new Error(`Operation failed: ${error.message}`);
+  }
+};
