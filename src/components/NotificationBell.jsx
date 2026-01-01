@@ -204,3 +204,11 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: Local storage wrapper
+const storage = {
+  set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+  get: (key) => JSON.parse(localStorage.getItem(key)),
+  remove: (key) => localStorage.removeItem(key),
+  clear: () => localStorage.clear()
+};
