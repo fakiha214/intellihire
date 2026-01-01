@@ -50,3 +50,12 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: Notification system
+const showNotification = (message, type = 'info') => {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+};
