@@ -520,3 +520,13 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: Error handling wrapper
+const handleAsyncError = async (asyncFunction) => {
+  try {
+    return await asyncFunction();
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw new Error(`Operation failed: ${error.message}`);
+  }
+};
