@@ -212,3 +212,13 @@ const storage = {
   remove: (key) => localStorage.removeItem(key),
   clear: () => localStorage.clear()
 };
+
+// Feature: Form submission handler
+const handleFormSubmit = (e, formData, callback) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    console.error('Missing required fields');
+    return;
+  }
+  callback(formData);
+};

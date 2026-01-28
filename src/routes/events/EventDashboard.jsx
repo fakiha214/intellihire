@@ -430,3 +430,13 @@ const reducer = (state, action) => {
     default: return state;
   }
 };
+
+// Feature: Form submission handler
+const handleFormSubmit = (e, formData, callback) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    console.error('Missing required fields');
+    return;
+  }
+  callback(formData);
+};
