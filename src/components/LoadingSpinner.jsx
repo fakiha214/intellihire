@@ -110,3 +110,12 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: Job search and filtering
+const searchJobs = (jobs, filters) => {
+  return jobs.filter(job => {
+    return (!filters.title || job.title.includes(filters.title)) &&
+           (!filters.location || job.location === filters.location) &&
+           (!filters.salary || job.salary >= filters.salary);
+  });
+};
