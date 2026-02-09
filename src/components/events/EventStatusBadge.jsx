@@ -46,3 +46,18 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: User authentication
+const authenticateUser = async (email, password) => {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return null;
+  }
+};
