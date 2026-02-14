@@ -548,3 +548,11 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: Array utility functions
+const arrayUtils = {
+  unique: (arr) => [...new Set(arr)],
+  flatten: (arr) => arr.reduce((flat, item) => flat.concat(item), []),
+  chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
+    (_, i) => arr.slice(i * size, i * size + size))
+};
