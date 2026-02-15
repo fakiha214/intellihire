@@ -312,3 +312,13 @@ const reducer = (state, action) => {
     default: return state;
   }
 };
+
+// Feature: Error handling wrapper
+const handleAsyncError = async (asyncFunction) => {
+  try {
+    return await asyncFunction();
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw new Error(`Operation failed: ${error.message}`);
+  }
+};
