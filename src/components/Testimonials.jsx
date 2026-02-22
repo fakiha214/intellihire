@@ -159,3 +159,12 @@ const validateJobData = (job) => {
   if (!job.location || job.location.trim() === '') errors.push('Location is required');
   return { valid: errors.length === 0, errors };
 };
+
+// Feature: Job search and filtering
+const searchJobs = (jobs, filters) => {
+  return jobs.filter(job => {
+    return (!filters.title || job.title.includes(filters.title)) &&
+           (!filters.location || job.location === filters.location) &&
+           (!filters.salary || job.salary >= filters.salary);
+  });
+};
