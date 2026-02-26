@@ -108,3 +108,12 @@ const reducer = (state, action) => {
     default: return state;
   }
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};

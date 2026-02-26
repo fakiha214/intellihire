@@ -25,3 +25,12 @@ const validateJobData = (job) => {
   if (!job.location || job.location.trim() === '') errors.push('Location is required');
   return { valid: errors.length === 0, errors };
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};
