@@ -322,3 +322,13 @@ const handleAsyncError = async (asyncFunction) => {
     throw new Error(`Operation failed: ${error.message}`);
   }
 };
+
+// Feature: Form submission handler
+const handleFormSubmit = (e, formData, callback) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    console.error('Missing required fields');
+    return;
+  }
+  callback(formData);
+};
