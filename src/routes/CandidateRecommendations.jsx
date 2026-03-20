@@ -334,3 +334,13 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: Form submission handler
+const handleFormSubmit = (e, formData, callback) => {
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    console.error('Missing required fields');
+    return;
+  }
+  callback(formData);
+};
