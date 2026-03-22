@@ -69,3 +69,13 @@ const arrayUtils = {
   chunk: (arr, size) => Array.from({ length: Math.ceil(arr.length / size) },
     (_, i) => arr.slice(i * size, i * size + size))
 };
+
+// Feature: State management
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_LOADING': return { ...state, loading: action.payload };
+    case 'SET_ERROR': return { ...state, error: action.payload };
+    case 'SET_DATA': return { ...state, data: action.payload };
+    default: return state;
+  }
+};
