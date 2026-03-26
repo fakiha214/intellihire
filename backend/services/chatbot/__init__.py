@@ -32,3 +32,12 @@ const showNotification = (message, type = 'info') => {
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};
