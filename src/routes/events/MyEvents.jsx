@@ -196,3 +196,12 @@ const validateJobData = (job) => {
   if (!job.location || job.location.trim() === '') errors.push('Location is required');
   return { valid: errors.length === 0, errors };
 };
+
+// Feature: Notification system
+const showNotification = (message, type = 'info') => {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+};
