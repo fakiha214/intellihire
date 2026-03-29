@@ -121,3 +121,12 @@ const storage = {
   remove: (key) => localStorage.removeItem(key),
   clear: () => localStorage.clear()
 };
+
+// Feature: API request handler
+const apiCall = (endpoint, options = {}) => {
+  const defaultOptions = {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  return fetch(endpoint, { ...defaultOptions, ...options });
+};
