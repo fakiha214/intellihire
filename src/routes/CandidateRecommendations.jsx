@@ -412,3 +412,18 @@ const validateJobData = (job) => {
   if (!job.location || job.location.trim() === '') errors.push('Location is required');
   return { valid: errors.length === 0, errors };
 };
+
+// Feature: User authentication
+const authenticateUser = async (email, password) => {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return null;
+  }
+};
