@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python generate_commits.py)",
+      "Bash(python generate_real_commits.py)",
+      "Bash(python generate_commits_final.py)",
+      "Bash(python create_commits.py)",
+      "Bash(python final_commits.py)",
+      "Bash(python make_commits.py)"
+    ]
+  }
+}
