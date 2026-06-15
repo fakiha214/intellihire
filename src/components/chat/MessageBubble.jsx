@@ -10,11 +10,13 @@ const MessageBubble = ({ message, onDelete = null }) => {
   const isUser = message.role === 'user';
   
   // CV detect karne ke liye keywords
-  const isCV = !isUser && message.content && (
-    message.content.includes('Experience') || 
-    message.content.includes('Education') || 
-    message.content.includes('Skills') ||
-    message.content.toLowerCase().includes('curriculum vitae')
+  const _lc = (message.content || '').toLowerCase();
+  const isCV = !isUser && (
+    _lc.includes('experience') ||
+    _lc.includes('education') ||
+    _lc.includes('skills') ||
+    _lc.includes('summary') ||
+    _lc.includes('curriculum vitae')
   );
 
   const handleDownloadPDF = async () => {

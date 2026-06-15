@@ -25,12 +25,19 @@ export const chatAPI = {
         }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send message');
+      // The server may return a non-JSON page (e.g. an nginx 502/504 HTML page
+      // while the backend is restarting). Guard against parsing that as JSON.
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('The assistant is temporarily unavailable. Please try again in a moment.');
       }
 
-      return await response.json();
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to send message');
+      }
+
+      return data;
     } catch (error) {
       console.error('Chat API error:', error);
       throw error;
