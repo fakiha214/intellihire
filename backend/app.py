@@ -2863,31 +2863,33 @@ def generate_cv_pdf():
             content = content.replace(ch, rep)
         content = content.encode('ascii', 'ignore').decode('ascii')
 
-        # Header details from the logged-in user's profile when available
+        # Header (name + contact) from the logged-in user's profile when available
         def _ascii(s):
             return (s or "").encode('ascii', 'ignore').decode('ascii').strip()
 
         name = "Curriculum Vitae"
-        role = ""
         contact = ""
         if 'user_id' in session:
             u = User.query.get(session['user_id'])
             if u:
                 name = u.full_name or name
                 prof = Profile.query.filter_by(user_id=u.id).first()
-                if prof:
-                    role = prof.title or ""
-                    bits = [u.email]
-                    if prof.phone:
-                        bits.append(prof.phone)
-                    if prof.location:
-                        bits.append(prof.location)
-                    contact = "  |  ".join([b for b in bits if b])
+                cbits = []
+                if prof and prof.location:
+                    cbits.append(prof.location)
+                cbits.append(u.email)
+                if prof and prof.phone:
+                    cbits.append(prof.phone)
+                contact = ", ".join([b for b in cbits if b])
         name = _ascii(name) or "Curriculum Vitae"
-        role = _ascii(role)
         contact = _ascii(contact)
 
-        # Convert the chatbot's markdown-ish reply into template-ready HTML
+        # Convert the chatbot's reply into ATS-template HTML.
+        # Recognised structure (matches the CV format in the chatbot system prompt):
+        #   "## SECTION"          -> centered, ruled section title
+        #   "Left | Right"        -> two-column row (org line bold, role line italic)
+        #   "- item" / "1. item"  -> bullet list
+        #   anything else         -> paragraph
         import html as _html
 
         def _inline(t):
@@ -2895,51 +2897,65 @@ def generate_cv_pdf():
             t = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
             return t
 
-        html_parts = []
+        parts = []
         in_list = False
+        org_next = True
+
+        def _close_list():
+            nonlocal in_list
+            if in_list:
+                parts.append('</ul>')
+                in_list = False
+
         for raw in content.split('\n'):
             s = raw.strip()
             if not s:
-                if in_list:
-                    html_parts.append('</ul>')
-                    in_list = False
+                _close_list()
+                org_next = True
                 continue
-            if s.startswith('#'):
-                if in_list:
-                    html_parts.append('</ul>')
-                    in_list = False
-                html_parts.append('<h2 class="section">%s</h2>' % _inline(s.lstrip('#').strip()))
-                continue
-            if s.startswith('**') and s.endswith('**') and s.count('**') == 2 and len(s) > 4:
-                if in_list:
-                    html_parts.append('</ul>')
-                    in_list = False
-                html_parts.append('<h2 class="section">%s</h2>' % _html.escape(s.strip('*').strip()))
-                continue
-            mb = re.match(r'^[\*\-]\s+(.*)', s)
-            if mb:
-                if not in_list:
-                    html_parts.append('<ul>')
-                    in_list = True
-                html_parts.append('<li>%s</li>' % _inline(mb.group(1)))
-                continue
-            mn = re.match(r'^\d+\.\s+(.*)', s)
-            if mn:
-                if not in_list:
-                    html_parts.append('<ul>')
-                    in_list = True
-                html_parts.append('<li>%s</li>' % _inline(mn.group(1)))
-                continue
-            if in_list:
-                html_parts.append('</ul>')
-                in_list = False
-            html_parts.append('<p>%s</p>' % _inline(s))
-        if in_list:
-            html_parts.append('</ul>')
-        body_html = "\n".join(html_parts)
 
-        # Render the stored CV template, then convert to PDF
-        html_doc = render_template('cv_template.html', name=name, role=role, contact=contact, body=body_html)
+            section = None
+            if s.startswith('#'):
+                section = s.lstrip('#').strip()
+            elif s.startswith('**') and s.endswith('**') and s.count('**') == 2 and len(s) > 4:
+                section = s.strip('*').strip()
+            elif s.isupper() and 2 <= len(s) <= 40 and '|' not in s:
+                section = s
+            if section is not None:
+                _close_list()
+                parts.append('<h2 class="section">%s</h2>' % _html.escape(section.upper()))
+                org_next = True
+                continue
+
+            if '|' in s:
+                _close_list()
+                left, right = s.split('|', 1)
+                cls = 'org' if org_next else 'role'
+                parts.append(
+                    '<table class="row %s"><tr><td class="l">%s</td><td class="r">%s</td></tr></table>'
+                    % (cls, _inline(left.strip()), _inline(right.strip()))
+                )
+                org_next = not org_next
+                continue
+
+            m = re.match(r'^[\*\-]\s+(.*)', s) or re.match(r'^\d+\.\s+(.*)', s)
+            if m:
+                if not in_list:
+                    parts.append('<ul>')
+                    in_list = True
+                parts.append('<li>%s</li>' % _inline(m.group(1)))
+                org_next = True
+                continue
+
+            _close_list()
+            parts.append('<p>%s</p>' % _inline(s))
+            org_next = True
+
+        _close_list()
+        body_html = "\n".join(parts)
+
+        # Render the stored ATS CV template, then convert to PDF
+        html_doc = render_template('cv_template.html', name=name, contact=contact, body=body_html)
 
         buf = io.BytesIO()
         pisa.CreatePDF(src=html_doc, dest=buf, encoding='utf-8')

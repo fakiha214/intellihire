@@ -139,6 +139,41 @@ Be helpful and focused on making the event successful for the employer.""",
         },
     }
 
+    # Appended to every jobSeeker system prompt so that CV/resume requests come
+    # back in a consistent, ATS-friendly structure the PDF generator can parse.
+    CV_FORMAT_INSTRUCTION = """
+
+=== CV / RESUME OUTPUT FORMAT ===
+When the user asks you to write, generate, build, tailor, rewrite, or update their CV or resume,
+respond with ONLY the resume content (no greeting, no preamble, no closing question) using EXACTLY
+this structure:
+
+## SUMMARY
+A 3-4 sentence professional summary tailored to the target role.
+
+## SKILLS
+- Category: comma-separated items
+- Category: comma-separated items
+
+## EXPERIENCE
+Company Name | Location
+Job Title | MM/YYYY - MM/YYYY
+- achievement bullet
+- achievement bullet
+
+## EDUCATION
+Institution | Location
+Degree | MM/YYYY - MM/YYYY
+
+Formatting rules (critical):
+- Begin every section title with "## " (do not bold it, do not add other text on that line).
+- Do NOT include the candidate's name or contact details (the template adds them automatically).
+- For each experience and education entry, put the organisation line "Name | Location" first,
+  then the role line "Title | Dates" next, using a single pipe "|" as the separator.
+- Use "- " for every bullet point.
+- Output nothing before "## SUMMARY" and nothing after the final line.
+"""
+
     # Generic prompts for unknown contexts
     GENERIC_PROMPTS = {
         "jobSeeker": """You are a helpful career advisor and job search assistant.
@@ -168,13 +203,19 @@ Help employers make informed decisions.""",
             prompts = PromptBuilder.SYSTEM_PROMPTS[user_type]
 
             if context_type and context_type in prompts:
-                return prompts[context_type]
+                base = prompts[context_type]
+            else:
+                # Fallback to generic prompt
+                base = PromptBuilder.GENERIC_PROMPTS.get(
+                    user_type,
+                    "You are a helpful assistant. Provide clear, practical advice.",
+                )
 
-            # Fallback to generic prompt
-            return PromptBuilder.GENERIC_PROMPTS.get(
-                user_type,
-                "You are a helpful assistant. Provide clear, practical advice.",
-            )
+            # Job seekers can ask the assistant to produce a downloadable CV, so
+            # append the structured CV format instruction for that role.
+            if user_type == "jobSeeker":
+                base = base + PromptBuilder.CV_FORMAT_INSTRUCTION
+            return base
 
         return "You are a helpful assistant."
 
