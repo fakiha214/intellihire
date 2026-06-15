@@ -1,0 +1,44 @@
+# Production stack for the EC2 host (lives at /opt/intellihire/docker-compose.yml).
+# Images are built and pushed by GitHub Actions to GHCR.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: intellihire
+      POSTGRES_USER: intellihire
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intellihire -d intellihire"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    image: ghcr.io/fakiha214/intellihire-backend:latest
+    restart: always
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    expose:
+      - "5000"
+
+  web:
+    image: ghcr.io/fakiha214/intellihire-web:latest
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot-www:/var/www/certbot:ro
+
+volumes:
+  pgdata:

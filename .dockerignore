@@ -1,0 +1,9 @@
+# root context = frontend build
+node_modules
+dist
+backend
+aws-creds
+.git
+.github
+*.log
+**/__pycache__
