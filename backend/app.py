@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session, send_from_directory
+from flask import Flask, request, jsonify, session, send_from_directory, render_template
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -26,6 +26,10 @@ try:
     from fpdf import FPDF
 except ImportError:
     FPDF = None
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
 import re
 
 app = Flask(__name__)
@@ -2840,8 +2844,8 @@ def generate_job_content():
 @app.route('/api/chat/generate-cv-pdf', methods=['POST'])
 def generate_cv_pdf():
     try:
-        if FPDF is None:
-            return jsonify({'error': 'PDF generation is unavailable. Install fpdf2 (pip install -r requirements.txt).'}), 503
+        if pisa is None:
+            return jsonify({'error': 'PDF generation is unavailable. Install xhtml2pdf (pip install -r requirements.txt).'}), 503
 
         data = request.json
         content = data.get('content', '')
@@ -2849,36 +2853,106 @@ def generate_cv_pdf():
         if not content:
             return jsonify({'error': 'Empty content'}), 400
 
-        # EFFICIENT CLEANING: Map common AI symbols to PDF-safe characters
+        # Normalise common AI typography so the latin-1 core fonts render cleanly
         replacements = {
             '\u2022': '-', '\u2023': '-', '\u2014': '-', '\u2013': '-',
             '\u201c': '"', '\u201d': '"', '\u2018': "'", '\u2019': "'",
             '\u2605': '*', '\u2713': 'ok'
         }
-        for char, replacement in replacements.items():
-            content = content.replace(char, replacement)
-        
-        # Strip remaining non-latin1 characters to prevent 500 error
+        for ch, rep in replacements.items():
+            content = content.replace(ch, rep)
         content = content.encode('ascii', 'ignore').decode('ascii')
 
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        
-        # Header
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 10, "CURRICULUM VITAE", ln=True, align='C')
-        pdf.ln(10)
-        
-        # Content
-        pdf.set_font("Arial", size=11)
-        pdf.multi_cell(0, 7, content)
+        # Header details from the logged-in user's profile when available
+        def _ascii(s):
+            return (s or "").encode('ascii', 'ignore').decode('ascii').strip()
 
-        # Generate response. fpdf2's output() returns a bytearray; wrap in bytes()
-        # so Werkzeug sends the binary body instead of iterating it into an empty response.
-        response = make_response(bytes(pdf.output()))
+        name = "Curriculum Vitae"
+        role = ""
+        contact = ""
+        if 'user_id' in session:
+            u = User.query.get(session['user_id'])
+            if u:
+                name = u.full_name or name
+                prof = Profile.query.filter_by(user_id=u.id).first()
+                if prof:
+                    role = prof.title or ""
+                    bits = [u.email]
+                    if prof.phone:
+                        bits.append(prof.phone)
+                    if prof.location:
+                        bits.append(prof.location)
+                    contact = "  |  ".join([b for b in bits if b])
+        name = _ascii(name) or "Curriculum Vitae"
+        role = _ascii(role)
+        contact = _ascii(contact)
+
+        # Convert the chatbot's markdown-ish reply into template-ready HTML
+        import html as _html
+
+        def _inline(t):
+            t = _html.escape(t)
+            t = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
+            return t
+
+        html_parts = []
+        in_list = False
+        for raw in content.split('\n'):
+            s = raw.strip()
+            if not s:
+                if in_list:
+                    html_parts.append('</ul>')
+                    in_list = False
+                continue
+            if s.startswith('#'):
+                if in_list:
+                    html_parts.append('</ul>')
+                    in_list = False
+                html_parts.append('<h2 class="section">%s</h2>' % _inline(s.lstrip('#').strip()))
+                continue
+            if s.startswith('**') and s.endswith('**') and s.count('**') == 2 and len(s) > 4:
+                if in_list:
+                    html_parts.append('</ul>')
+                    in_list = False
+                html_parts.append('<h2 class="section">%s</h2>' % _html.escape(s.strip('*').strip()))
+                continue
+            mb = re.match(r'^[\*\-]\s+(.*)', s)
+            if mb:
+                if not in_list:
+                    html_parts.append('<ul>')
+                    in_list = True
+                html_parts.append('<li>%s</li>' % _inline(mb.group(1)))
+                continue
+            mn = re.match(r'^\d+\.\s+(.*)', s)
+            if mn:
+                if not in_list:
+                    html_parts.append('<ul>')
+                    in_list = True
+                html_parts.append('<li>%s</li>' % _inline(mn.group(1)))
+                continue
+            if in_list:
+                html_parts.append('</ul>')
+                in_list = False
+            html_parts.append('<p>%s</p>' % _inline(s))
+        if in_list:
+            html_parts.append('</ul>')
+        body_html = "\n".join(html_parts)
+
+        # Render the stored CV template, then convert to PDF
+        html_doc = render_template('cv_template.html', name=name, role=role, contact=contact, body=body_html)
+
+        buf = io.BytesIO()
+        pisa.CreatePDF(src=html_doc, dest=buf, encoding='utf-8')
+        pdf_bytes = buf.getvalue()
+        buf.close()
+
+        if not pdf_bytes:
+            return jsonify({'error': 'PDF Generation Failed'}), 500
+
+        safe_name = (name.replace(' ', '_') or 'cv')
+        response = make_response(pdf_bytes)
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = 'attachment; filename=cv.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename={safe_name}_CV.pdf'
         return response
 
     except Exception as e:

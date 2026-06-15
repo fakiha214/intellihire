@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    @page { size: a4; margin: 0; }
+    body { font-family: Helvetica; font-size: 10.5pt; color: #212529; margin: 0; }
+
+    .header {
+      background-color: #2563eb;
+      color: #ffffff;
+      padding: 26px 34px 20px 34px;
+    }
+    .header .name { font-size: 25pt; font-weight: bold; }
+    .header .role { font-size: 13pt; margin-top: 5px; color: #eaf1ff; }
+    .header .contact { font-size: 9pt; margin-top: 8px; color: #cfe0ff; }
+
+    .content { padding: 18px 34px 34px 34px; }
+
+    h2.section {
+      color: #2563eb;
+      font-size: 13pt;
+      font-weight: bold;
+      border-bottom: 1px solid #2563eb;
+      padding-bottom: 3px;
+      margin-top: 16px;
+      margin-bottom: 7px;
+    }
+    p { margin: 3px 0; line-height: 1.45; }
+    ul { margin: 4px 0 10px 0; }
+    li { margin: 3px 0; line-height: 1.4; }
+    strong { color: #111827; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="name">{{ name }}</div>
+    {% if role %}<div class="role">{{ role }}</div>{% endif %}
+    {% if contact %}<div class="contact">{{ contact }}</div>{% endif %}
+  </div>
+  <div class="content">
+    {{ body|safe }}
+  </div>
+</body>
+</html>
