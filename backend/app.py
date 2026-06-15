@@ -2874,8 +2874,9 @@ def generate_cv_pdf():
         pdf.set_font("Arial", size=11)
         pdf.multi_cell(0, 7, content)
 
-        # Generate response
-        response = make_response(pdf.output())
+        # Generate response. fpdf2's output() returns a bytearray; wrap in bytes()
+        # so Werkzeug sends the binary body instead of iterating it into an empty response.
+        response = make_response(bytes(pdf.output()))
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = 'attachment; filename=cv.pdf'
         return response
